@@ -161,15 +161,19 @@ class GastoViewModel @Inject constructor(
         }
     }
 
+    var selectedSuplidorId by mutableStateOf(0)
+
     fun editarGasto(gasto: GastoDto) {
+        _uiState.update { state -> state.copy(gastoEditando = gasto) }
         idSuplidor = gasto.idSuplidor ?: 0
-        concepto = gasto.concepto
-        ncf = gasto.ncf.toString()
-        itbis = gasto.itbis
-        monto = gasto.monto
-        fecha = gasto.fecha
-        _uiState.update { it.copy(gastoEditando = gasto) }
+        selectedSuplidorId = gasto.idSuplidor ?: 0
+        concepto = gasto.concepto ?: ""
+        ncf = gasto.ncf ?: ""
+        itbis = gasto.itbis ?: 0.0
+        monto = gasto.monto ?: 0.0
     }
+
+
 
     fun updateGasto() {
         viewModelScope.launch {
@@ -197,8 +201,7 @@ class GastoViewModel @Inject constructor(
                             _uiState.value.gastos.map { if (it.idGasto == gastoActualizado.idGasto) gastoActualizado else it }
                         _uiState.update { state ->
                             state.copy(
-                                gastos = updatedGastos,
-                                gastoEditando = null
+                                gastos = updatedGastos, gastoEditando = null
                             )
                         }
                         limpiar()
