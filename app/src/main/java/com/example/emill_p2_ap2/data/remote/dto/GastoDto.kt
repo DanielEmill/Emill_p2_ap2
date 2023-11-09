@@ -8,7 +8,7 @@ data class GastoDto (
     var idSuplidor: Int? = null,
     var suplidor: String = "",
     var concepto: String = "",
-    var ncf: String = "",
+    var ncf: String? = null,
     var itbis: Double = 0.0,
     var monto: Double = 0.0
 )

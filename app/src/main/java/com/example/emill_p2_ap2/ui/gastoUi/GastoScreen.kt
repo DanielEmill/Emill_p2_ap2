@@ -11,18 +11,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.emill_p2_ap2.data.local.model.suplidores
 import com.example.emill_p2_ap2.data.remote.dto.GastoDto
 import com.example.emill_p2_ap2.util.*
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -32,18 +33,13 @@ import java.util.Locale
 fun GastoScreen(gastoViewModel: GastoViewModel = viewModel()) {
     val uiState by gastoViewModel.uiState.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Gastos API") }
-            )
-        }
-    ) { padding ->
+    Scaffold(topBar = {
+        TopAppBar(title = { Text("Gastos API") })
+    }) { padding ->
         when {
             uiState.isLoading -> {
                 Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
+                    contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()
                 ) {
                     CircularProgressIndicator()
                 }
@@ -57,6 +53,7 @@ fun GastoScreen(gastoViewModel: GastoViewModel = viewModel()) {
                 Column {
                     Spacer(modifier = Modifier.height(padding.calculateTopPadding()))
                     RegistroGastoScreen(gastoViewModel)
+                    SaveButton(gastoViewModel)
                     GastoDetails(gastoList = uiState.gastos)
                 }
             }
@@ -64,6 +61,58 @@ fun GastoScreen(gastoViewModel: GastoViewModel = viewModel()) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RegistroGastoScreen(viewModel: GastoViewModel) {
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+    ) {
+        SuplidorDropdown(
+            suplidores = suplidores,
+            selectedSuplidorId = viewModel.idSuplidor,
+            onSuplidorSelected = { selectedSuplidorId ->
+                viewModel.idSuplidor = selectedSuplidorId
+            }
+        )
+        CustomOutlinedTextField(
+            label = "Concepto",
+            value = viewModel.concepto,
+            modifier = Modifier.padding(vertical = 8.dp),
+            isValid = viewModel.isValidConcepto,
+            onValueChange = { viewModel.concepto = it },
+            imeAction = ImeAction.Next
+        )
+        CustomOutlinedTextField(
+            label = "NCF",
+            value = viewModel.ncf,
+            modifier = Modifier.padding(vertical = 8.dp),
+            isValid = viewModel.isValidNcf,
+            onValueChange = { viewModel.ncf = it },
+            imeAction = ImeAction.Next
+        )
+        CustomNumericalOutlinedTextFieldDouble(
+            label = "ITBIS",
+            value = viewModel.itbis,
+            modifier = Modifier.padding(vertical = 8.dp),
+            isValid = viewModel.isValidItbis,
+            onValueChange = { viewModel.itbis = it },
+            imeAction = ImeAction.Next
+        )
+        CustomNumericalOutlinedTextFieldDouble(
+            label = "Monto",
+            value = viewModel.monto,
+            modifier = Modifier.padding(vertical = 8.dp),
+            isValid = viewModel.isValidMonto,
+            onValueChange = { viewModel.monto = it },
+            imeAction = ImeAction.Done
+        )
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun GastoDetails(gastoList: List<GastoDto>) {
     LazyColumn(
@@ -72,10 +121,8 @@ fun GastoDetails(gastoList: List<GastoDto>) {
             .padding(16.dp)
     ) {
         items(gastoList) { gasto ->
-            val formatoOriginal = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-            val formatoNuevo = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val fechaParseada = formatoOriginal.parse(gasto.fecha)
-            val fechaFormateada = formatoNuevo.format(fechaParseada)
+            val fechaParseada = LocalDateTime.parse(gasto.fecha, DateTimeFormatter.ISO_DATE_TIME)
+            val fechaFormateada = fechaParseada.format(DateTimeFormatter.ISO_DATE)
 
             Card(
                 modifier = Modifier
@@ -119,8 +166,7 @@ fun GastoDetails(gastoList: List<GastoDto>) {
                         ) {
                             Text("NCF: ${gasto.ncf}", style = MaterialTheme.typography.bodyMedium)
                             Text(
-                                "ITBIS: ${gasto.itbis}",
-                                style = MaterialTheme.typography.bodyMedium
+                                "ITBIS: ${gasto.itbis}", style = MaterialTheme.typography.bodyMedium
                             )
                         }
                         Spacer(modifier = Modifier.width(16.dp))
@@ -134,66 +180,5 @@ fun GastoDetails(gastoList: List<GastoDto>) {
             }
             Spacer(modifier = Modifier.height(16.dp))
         }
-    }
-}
-@RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun RegistroGastoScreen(viewModel: GastoViewModel = viewModel()) {
-    var fecha by remember { mutableStateOf("") }
-    var idSuplidor by remember { mutableStateOf("") }
-    var suplidor by remember { mutableStateOf("") }
-    var concepto by remember { mutableStateOf("") }
-    var ncf by remember { mutableStateOf("") }
-    var itbis by remember { mutableStateOf("") }
-    var monto by remember { mutableStateOf("") }
-
-    Column(
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth()
-    ) {
-        CustomOutlinedTextField(
-            label = "Suplidor",
-            value = suplidor,
-            onValueChange = { suplidor = it },
-            isValid = viewModel.isValidSuplidor
-        )
-        CustomOutlinedTextField(
-            label = "Concepto",
-            value = concepto,
-            onValueChange = { concepto = it },
-            isValid = viewModel.isValidConcepto
-        )
-        CustomOutlinedTextField(
-            label = "NCF",
-            value = ncf,
-            onValueChange = { ncf = it },
-            isValid = viewModel.isValidNcf
-        )
-        CustomNumericalOutlinedTextFieldDouble(
-            label = "ITBIS",
-            value = itbis.toDoubleOrNull() ?: 0.0,
-            onValueChange = { itbis = it.toString() },
-            isValid = viewModel.isValidItbis
-        )
-        CustomNumericalOutlinedTextFieldDouble(
-            label = "Monto",
-            value = monto.toDoubleOrNull() ?: 0.0,
-            onValueChange = { monto = it.toString() },
-            isValid = viewModel.isValidMonto
-        )
-        SaveButton(
-            gastoDto = GastoDto(
-                fecha = fecha,
-                idSuplidor = idSuplidor.toIntOrNull(),
-                suplidor = suplidor,
-                concepto = concepto,
-                ncf = ncf,
-                itbis = itbis.toDoubleOrNull() ?: 0.0,
-                monto = monto.toDoubleOrNull() ?: 0.0
-            ),
-            viewModel = viewModel
-        )
     }
 }

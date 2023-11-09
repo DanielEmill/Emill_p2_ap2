@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
@@ -31,10 +32,11 @@ data class GastoListState(
 class GastoViewModel @Inject constructor(
     private val gastoRepository: GastoRepository
 ) : ViewModel() {
+    private val _uiState = MutableStateFlow(GastoListState())
+    val uiState: StateFlow<GastoListState> = _uiState.asStateFlow()
 
     //
     var idSuplidor by mutableStateOf(0)
-    var suplidor by mutableStateOf("")
     var concepto by mutableStateOf("")
     var ncf by mutableStateOf("")
     var itbis by mutableStateOf(0.0)
@@ -49,9 +51,25 @@ class GastoViewModel @Inject constructor(
     var isValidItbis by mutableStateOf(true)
     var isValidMonto by mutableStateOf(true)
 
+    private fun isValid(): Boolean {
+        isValidFecha = fecha.isNotBlank()
+        isValidIdSuplidor = idSuplidor > 0
+        isValidConcepto = concepto.isNotBlank()
+        isValidNcf = ncf.isNotBlank()
+        isValidItbis = itbis > 0.0
+        isValidMonto = monto > 0.0
+
+        if (!isValidFecha) println("Fecha no es válida")
+        if (!isValidIdSuplidor) println("IdSuplidor no es válido")
+        if (!isValidConcepto) println("Concepto no es válido")
+        if (!isValidNcf) println("NCF no es válido")
+        if (!isValidItbis) println("ITBIS no es válido")
+        if (!isValidMonto) println("Monto no es válido")
+
+        return isValidFecha && isValidIdSuplidor && isValidSuplidor && isValidConcepto && isValidNcf && isValidItbis && isValidMonto
+    }
     //
-    private val _uiState = MutableStateFlow(GastoListState())
-    val uiState: StateFlow<GastoListState> = _uiState.asStateFlow()
+
 
     init {
         loadGastos()
@@ -68,9 +86,7 @@ class GastoViewModel @Inject constructor(
                     is Resource.Success -> {
                         _uiState.update {
                             it.copy(
-                                gastos = result.data ?: emptyList(),
-                                isLoading = false,
-                                error = null
+                                gastos = result.data ?: emptyList(), isLoading = false, error = null
                             )
                         }
                     }
@@ -78,8 +94,7 @@ class GastoViewModel @Inject constructor(
                     is Resource.Error -> {
                         _uiState.update {
                             it.copy(
-                                error = result.message ?: "Error desconocido",
-                                isLoading = false
+                                error = result.message ?: "Error desconocido", isLoading = false
                             )
                         }
                     }
@@ -87,34 +102,50 @@ class GastoViewModel @Inject constructor(
             }
         }
     }
-    fun addGasto(gastoDto: GastoDto) {
+
+    var errorMessage by mutableStateOf<String?>(null)
+    fun postGasto() {
         viewModelScope.launch {
             if (isValid()) {
-                gastoRepository.postGasto(gastoDto)
-                limpiar()
+                println("Guardando gasto...")
+
+                val fechaActual = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"))
+                val nuevoGastoDto = GastoDto(
+                    fecha = fechaActual,
+                    idSuplidor = idSuplidor,
+                    concepto = concepto,
+                    ncf = ncf,
+                    itbis = itbis,
+                    monto = monto
+                )
+
+                try {
+                    val result = gastoRepository.postGasto(nuevoGastoDto)
+                    if (result is Resource.Success) {
+                        val updatedGastos = _uiState.value.gastos + nuevoGastoDto
+                        _uiState.update { it.copy(gastos = updatedGastos) }
+                        limpiar()
+                        println("Gasto guardado!")
+                    } else {
+                        _uiState.value = _uiState.value.copy(error = (result as Resource.Error).message ?: "Error desconocido")
+                    }
+                } catch (e: Exception) {
+                    _uiState.value = _uiState.value.copy(error = e.message ?: "Error desconocido")
+                }
+
+            } else {
+                println("Datos de gasto no son válidos.")
             }
         }
     }
-    private fun isValid(): Boolean {
-        isValidFecha = fecha.isNotBlank()
-        isValidIdSuplidor = idSuplidor > 0
-        isValidSuplidor = suplidor.isNotBlank()
-        isValidConcepto = concepto.isNotBlank()
-        isValidNcf = ncf.isNotBlank()
-        isValidItbis = itbis > 0.0
-        isValidMonto = monto > 0.0
-        return isValidFecha && isValidIdSuplidor && isValidSuplidor && isValidConcepto && isValidNcf && isValidItbis && isValidMonto
-    }
+
 
     private fun limpiar() {
         fecha = ""
         idSuplidor = 0
-        suplidor = ""
         concepto = ""
         ncf = ""
         itbis = 0.0
         monto = 0.0
     }
-
-
 }
