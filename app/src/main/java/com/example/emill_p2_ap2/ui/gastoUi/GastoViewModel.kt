@@ -1,5 +1,7 @@
 package com.example.emill_p2_ap2.ui.gastoUi
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -14,6 +16,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 data class GastoListState(
@@ -22,19 +26,20 @@ data class GastoListState(
     val gastos: List<GastoDto> = emptyList()
 )
 
+@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class GastoViewModel @Inject constructor(
     private val gastoRepository: GastoRepository
 ) : ViewModel() {
 
     //
-    var fecha by mutableStateOf("")
     var idSuplidor by mutableStateOf(0)
     var suplidor by mutableStateOf("")
     var concepto by mutableStateOf("")
     var ncf by mutableStateOf("")
     var itbis by mutableStateOf(0.0)
     var monto by mutableStateOf(0.0)
+    var fecha by mutableStateOf(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
 
     var isValidFecha by mutableStateOf(true)
     var isValidIdSuplidor by mutableStateOf(true)
@@ -82,19 +87,6 @@ class GastoViewModel @Inject constructor(
             }
         }
     }
-
-    private fun isValid(): Boolean {
-        isValidFecha = fecha.isNotBlank()
-        isValidIdSuplidor = idSuplidor > 0
-        isValidSuplidor = suplidor.isNotBlank()
-        isValidConcepto = concepto.isNotBlank()
-        isValidNcf = ncf.isNotBlank()
-        isValidItbis = itbis > 0.0
-        isValidMonto = monto > 0.0
-
-        return isValidFecha && isValidIdSuplidor && isValidSuplidor && isValidConcepto && isValidNcf && isValidItbis && isValidMonto
-    }
-
     fun addGasto(gastoDto: GastoDto) {
         viewModelScope.launch {
             if (isValid()) {
@@ -103,7 +95,16 @@ class GastoViewModel @Inject constructor(
             }
         }
     }
-
+    private fun isValid(): Boolean {
+        isValidFecha = fecha.isNotBlank()
+        isValidIdSuplidor = idSuplidor > 0
+        isValidSuplidor = suplidor.isNotBlank()
+        isValidConcepto = concepto.isNotBlank()
+        isValidNcf = ncf.isNotBlank()
+        isValidItbis = itbis > 0.0
+        isValidMonto = monto > 0.0
+        return isValidFecha && isValidIdSuplidor && isValidSuplidor && isValidConcepto && isValidNcf && isValidItbis && isValidMonto
+    }
 
     private fun limpiar() {
         fecha = ""

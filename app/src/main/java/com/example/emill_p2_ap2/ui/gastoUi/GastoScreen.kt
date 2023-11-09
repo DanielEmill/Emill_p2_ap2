@@ -1,6 +1,8 @@
 package com.example.emill_p2_ap2.ui.gastoUi
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,6 +25,7 @@ import com.example.emill_p2_ap2.util.*
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,6 +56,7 @@ fun GastoScreen(gastoViewModel: GastoViewModel = viewModel()) {
             uiState.gastos != null -> {
                 Column {
                     Spacer(modifier = Modifier.height(padding.calculateTopPadding()))
+                    RegistroGastoScreen(gastoViewModel)
                     GastoDetails(gastoList = uiState.gastos)
                 }
             }
@@ -121,7 +125,7 @@ fun GastoDetails(gastoList: List<GastoDto>) {
                         }
                         Spacer(modifier = Modifier.width(16.dp))
                         Text(
-                            "Monto: ${gasto.monto}",
+                            "$${gasto.monto}",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.error
                         )
@@ -130,5 +134,66 @@ fun GastoDetails(gastoList: List<GastoDto>) {
             }
             Spacer(modifier = Modifier.height(16.dp))
         }
+    }
+}
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RegistroGastoScreen(viewModel: GastoViewModel = viewModel()) {
+    var fecha by remember { mutableStateOf("") }
+    var idSuplidor by remember { mutableStateOf("") }
+    var suplidor by remember { mutableStateOf("") }
+    var concepto by remember { mutableStateOf("") }
+    var ncf by remember { mutableStateOf("") }
+    var itbis by remember { mutableStateOf("") }
+    var monto by remember { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+    ) {
+        CustomOutlinedTextField(
+            label = "Suplidor",
+            value = suplidor,
+            onValueChange = { suplidor = it },
+            isValid = viewModel.isValidSuplidor
+        )
+        CustomOutlinedTextField(
+            label = "Concepto",
+            value = concepto,
+            onValueChange = { concepto = it },
+            isValid = viewModel.isValidConcepto
+        )
+        CustomOutlinedTextField(
+            label = "NCF",
+            value = ncf,
+            onValueChange = { ncf = it },
+            isValid = viewModel.isValidNcf
+        )
+        CustomNumericalOutlinedTextFieldDouble(
+            label = "ITBIS",
+            value = itbis.toDoubleOrNull() ?: 0.0,
+            onValueChange = { itbis = it.toString() },
+            isValid = viewModel.isValidItbis
+        )
+        CustomNumericalOutlinedTextFieldDouble(
+            label = "Monto",
+            value = monto.toDoubleOrNull() ?: 0.0,
+            onValueChange = { monto = it.toString() },
+            isValid = viewModel.isValidMonto
+        )
+        SaveButton(
+            gastoDto = GastoDto(
+                fecha = fecha,
+                idSuplidor = idSuplidor.toIntOrNull(),
+                suplidor = suplidor,
+                concepto = concepto,
+                ncf = ncf,
+                itbis = itbis.toDoubleOrNull() ?: 0.0,
+                monto = monto.toDoubleOrNull() ?: 0.0
+            ),
+            viewModel = viewModel
+        )
     }
 }
