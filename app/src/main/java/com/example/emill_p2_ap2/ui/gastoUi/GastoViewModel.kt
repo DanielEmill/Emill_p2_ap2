@@ -80,6 +80,7 @@ class GastoViewModel @Inject constructor(
                     is Resource.Loading -> {
                         _uiState.update { it.copy(isLoading = true) }
                     }
+
                     is Resource.Success -> {
                         _uiState.update {
                             it.copy(
@@ -87,6 +88,7 @@ class GastoViewModel @Inject constructor(
                             )
                         }
                     }
+
                     is Resource.Error -> {
                         _uiState.update {
                             it.copy(
@@ -98,12 +100,14 @@ class GastoViewModel @Inject constructor(
             }
         }
     }
+
     fun postGasto() {
         viewModelScope.launch {
             if (isValid()) {
                 println("Guardando gasto...")
 
-                val fechaActual = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"))
+                val fechaActual = LocalDateTime.now()
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"))
                 val nuevoGastoDto = GastoDto(
                     fecha = fechaActual,
                     idSuplidor = idSuplidor,
@@ -123,7 +127,9 @@ class GastoViewModel @Inject constructor(
                             println("Gasto guardado!")
                         }
                     } else {
-                        _uiState.value = _uiState.value.copy(error = (result as Resource.Error).message ?: "Error desconocido")
+                        _uiState.value = _uiState.value.copy(
+                            error = (result as Resource.Error).message ?: "Error desconocido"
+                        )
                     }
                 } catch (e: Exception) {
                     _uiState.value = _uiState.value.copy(error = e.message ?: "Error desconocido")
@@ -135,6 +141,24 @@ class GastoViewModel @Inject constructor(
         }
     }
 
+    fun deleteGasto(id: Int) {
+        viewModelScope.launch {
+            try {
+                val result = gastoRepository.deleteGasto(id)
+                if (result is Resource.Success) {
+                    val updatedGastos = _uiState.value.gastos.filter { it.idGasto != id }
+                    _uiState.update { state -> state.copy(gastos = updatedGastos) }
+                    println("Gasto eliminado!")
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        error = (result as Resource.Error).message ?: "Error desconocido"
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(error = e.message ?: "Error desconocido")
+            }
+        }
+    }
 
     private fun limpiar() {
         fecha = ""

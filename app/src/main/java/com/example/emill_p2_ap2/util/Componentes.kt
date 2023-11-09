@@ -165,9 +165,7 @@ fun CustomNumericalOutlinedTextFieldDouble(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SuplidorDropdown(
-    suplidores: List<Suplidor>,
-    selectedSuplidorId: Int,
-    onSuplidorSelected: (Int) -> Unit
+    suplidores: List<Suplidor>, selectedSuplidorId: Int, onSuplidorSelected: (Int) -> Unit
 ) {
     val options = suplidores
     var expanded by remember { mutableStateOf(false) }

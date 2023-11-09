@@ -54,7 +54,10 @@ fun GastoScreen(gastoViewModel: GastoViewModel = viewModel()) {
                     Spacer(modifier = Modifier.height(padding.calculateTopPadding()))
                     RegistroGastoScreen(gastoViewModel)
                     SaveButton(gastoViewModel)
-                    GastoDetails(gastoList = uiState.gastos)
+                    GastoDetails(gastoList = uiState.gastos, onEdit = { gasto ->
+                    }, onDelete = { idGasto ->
+                        gastoViewModel.deleteGasto(idGasto)
+                    })
                 }
             }
         }
@@ -70,13 +73,11 @@ fun RegistroGastoScreen(viewModel: GastoViewModel) {
             .padding(16.dp)
             .fillMaxWidth()
     ) {
-        SuplidorDropdown(
-            suplidores = suplidores,
+        SuplidorDropdown(suplidores = suplidores,
             selectedSuplidorId = viewModel.idSuplidor,
             onSuplidorSelected = { selectedSuplidorId ->
                 viewModel.idSuplidor = selectedSuplidorId
-            }
-        )
+            })
         CustomOutlinedTextField(
             label = "Concepto",
             value = viewModel.concepto,
@@ -114,7 +115,7 @@ fun RegistroGastoScreen(viewModel: GastoViewModel) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun GastoDetails(gastoList: List<GastoDto>) {
+fun GastoDetails(gastoList: List<GastoDto>, onEdit: (GastoDto) -> Unit, onDelete: (Int) -> Unit) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -175,6 +176,30 @@ fun GastoDetails(gastoList: List<GastoDto>) {
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.error
                         )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        Button(
+                            onClick = { onEdit(gasto) },
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 4.dp)
+                        ) {
+                            Text("Modificar")
+                        }
+                        Button(
+                            onClick = { gasto.idGasto?.let { onDelete(it) } },
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 4.dp)
+                        ) {
+                            Text("Eliminar")
+                        }
                     }
                 }
             }

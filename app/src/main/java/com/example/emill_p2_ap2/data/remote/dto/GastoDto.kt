@@ -1,9 +1,9 @@
 package com.example.emill_p2_ap2.data.remote.dto
+
 import androidx.room.PrimaryKey
 
-data class GastoDto (
-    @PrimaryKey
-    var idGasto: Int? = null,
+data class GastoDto(
+    @PrimaryKey var idGasto: Int? = null,
     var fecha: String = "",
     var idSuplidor: Int? = null,
     var suplidor: String = "",

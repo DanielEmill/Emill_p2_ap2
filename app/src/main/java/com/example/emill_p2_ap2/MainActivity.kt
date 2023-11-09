@@ -28,8 +28,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             Emill_p2_ap2Theme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
                     val gastoViewModel: GastoViewModel = viewModel()
                     GastoScreen(gastoViewModel = gastoViewModel)
