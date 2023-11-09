@@ -52,14 +52,12 @@ class GastoViewModel @Inject constructor(
     var isValidMonto by mutableStateOf(true)
 
     private fun isValid(): Boolean {
-        isValidFecha = fecha.isNotBlank()
         isValidIdSuplidor = idSuplidor > 0
         isValidConcepto = concepto.isNotBlank()
         isValidNcf = ncf.isNotBlank()
         isValidItbis = itbis > 0.0
         isValidMonto = monto > 0.0
 
-        if (!isValidFecha) println("Fecha no es válida")
         if (!isValidIdSuplidor) println("IdSuplidor no es válido")
         if (!isValidConcepto) println("Concepto no es válido")
         if (!isValidNcf) println("NCF no es válido")
@@ -82,7 +80,6 @@ class GastoViewModel @Inject constructor(
                     is Resource.Loading -> {
                         _uiState.update { it.copy(isLoading = true) }
                     }
-
                     is Resource.Success -> {
                         _uiState.update {
                             it.copy(
@@ -90,7 +87,6 @@ class GastoViewModel @Inject constructor(
                             )
                         }
                     }
-
                     is Resource.Error -> {
                         _uiState.update {
                             it.copy(
@@ -102,8 +98,6 @@ class GastoViewModel @Inject constructor(
             }
         }
     }
-
-    var errorMessage by mutableStateOf<String?>(null)
     fun postGasto() {
         viewModelScope.launch {
             if (isValid()) {
@@ -118,14 +112,16 @@ class GastoViewModel @Inject constructor(
                     itbis = itbis,
                     monto = monto
                 )
-
                 try {
                     val result = gastoRepository.postGasto(nuevoGastoDto)
                     if (result is Resource.Success) {
-                        val updatedGastos = _uiState.value.gastos + nuevoGastoDto
-                        _uiState.update { it.copy(gastos = updatedGastos) }
-                        limpiar()
-                        println("Gasto guardado!")
+                        val gastoCreado = result.data
+                        gastoCreado?.let {
+                            val updatedGastos = _uiState.value.gastos + it
+                            _uiState.update { state -> state.copy(gastos = updatedGastos) }
+                            limpiar()
+                            println("Gasto guardado!")
+                        }
                     } else {
                         _uiState.value = _uiState.value.copy(error = (result as Resource.Error).message ?: "Error desconocido")
                     }
