@@ -21,6 +21,8 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -48,7 +50,11 @@ fun SaveButton(viewModel: GastoViewModel) {
     val keyboardController = LocalSoftwareKeyboardController.current
     OutlinedButton(
         onClick = {
-            viewModel.postGasto()
+            if (viewModel.uiState.value.gastoEditando != null) {
+                viewModel.updateGasto()
+            } else {
+                viewModel.postGasto()
+            }
             keyboardController?.hide()
         }, modifier = Modifier.fillMaxWidth()
     ) {
@@ -56,13 +62,12 @@ fun SaveButton(viewModel: GastoViewModel) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.AddCircle, contentDescription = "Guardar"
+                imageVector = Icons.Default.Add, contentDescription = "Guardar"
             )
             Text(text = "Guardar")
         }
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomOutlinedTextField(

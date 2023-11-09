@@ -24,7 +24,8 @@ import javax.inject.Inject
 data class GastoListState(
     val isLoading: Boolean = false,
     val error: String? = null,
-    val gastos: List<GastoDto> = emptyList()
+    val gastos: List<GastoDto> = emptyList(),
+    val gastoEditando: GastoDto? = null
 )
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -156,6 +157,62 @@ class GastoViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(error = e.message ?: "Error desconocido")
+            }
+        }
+    }
+
+    fun editarGasto(gasto: GastoDto) {
+        idSuplidor = gasto.idSuplidor ?: 0
+        concepto = gasto.concepto
+        ncf = gasto.ncf.toString()
+        itbis = gasto.itbis
+        monto = gasto.monto
+        fecha = gasto.fecha
+        _uiState.update { it.copy(gastoEditando = gasto) }
+    }
+
+    fun updateGasto() {
+        viewModelScope.launch {
+            if (isValid()) {
+                println("Actualizando gasto...")
+
+                val gastoEditando = uiState.value.gastoEditando
+                val fechaActual = LocalDateTime.now()
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"))
+
+                val gastoActualizado = GastoDto(
+                    idGasto = gastoEditando?.idGasto,
+                    fecha = fechaActual,
+                    idSuplidor = idSuplidor,
+                    concepto = concepto,
+                    ncf = ncf,
+                    itbis = itbis,
+                    monto = monto
+                )
+                try {
+                    val result =
+                        gastoRepository.putGasto(gastoActualizado.idGasto!!, gastoActualizado)
+                    if (result is Resource.Success) {
+                        val updatedGastos =
+                            _uiState.value.gastos.map { if (it.idGasto == gastoActualizado.idGasto) gastoActualizado else it }
+                        _uiState.update { state ->
+                            state.copy(
+                                gastos = updatedGastos,
+                                gastoEditando = null
+                            )
+                        }
+                        limpiar()
+                        println("Gasto actualizado!")
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            error = (result as Resource.Error).message ?: "Error desconocido"
+                        )
+                    }
+                } catch (e: Exception) {
+                    _uiState.value = _uiState.value.copy(error = e.message ?: "Error desconocido")
+                }
+            } else {
+                println("Datos de gasto no son válidos.")
             }
         }
     }

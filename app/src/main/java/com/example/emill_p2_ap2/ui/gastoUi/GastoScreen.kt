@@ -11,6 +11,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -54,20 +57,31 @@ fun GastoScreen(gastoViewModel: GastoViewModel = viewModel()) {
                     Spacer(modifier = Modifier.height(padding.calculateTopPadding()))
                     RegistroGastoScreen(gastoViewModel)
                     SaveButton(gastoViewModel)
-                    GastoDetails(gastoList = uiState.gastos, onEdit = { gasto ->
-                    }, onDelete = { idGasto ->
-                        gastoViewModel.deleteGasto(idGasto)
-                    })
+
+                    GastoDetails(
+                        gastoList = uiState.gastos,
+                        onEdit = { gasto -> gastoViewModel.editarGasto(gasto) },
+                        onDelete = { idGasto -> gastoViewModel.deleteGasto(idGasto) }
+                    )
                 }
             }
         }
     }
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistroGastoScreen(viewModel: GastoViewModel) {
+    val gastoEditando = viewModel.uiState.value.gastoEditando
+
+    var idSuplidor by remember { mutableStateOf(gastoEditando?.idSuplidor ?: 0) }
+    var concepto by remember { mutableStateOf(gastoEditando?.concepto ?: "") }
+    var ncf by remember { mutableStateOf(gastoEditando?.ncf ?: "") }
+    var itbis by remember { mutableStateOf(gastoEditando?.itbis ?: 0.0) }
+    var monto by remember { mutableStateOf(gastoEditando?.monto ?: 0.0) }
+
     Column(
         modifier = Modifier
             .padding(16.dp)
