@@ -6,18 +6,18 @@ import retrofit2.http.*
 
 interface GastoApi {
 
-    @GET("/api/Gastos")
-    fun getGastos(): List<GastoDto>
+    @GET("api/Gastos")
+    suspend fun getGastos(): List<GastoDto>
 
-    @GET("/api/Gastos/{id}")
-    fun getGastoId(@Path("id") id: Int): GastoDto
+    @GET("api/Gastos/{id}")
+    suspend fun getGastoId(@Path("id") id: Int): GastoDto
 
-    @POST("/api/Gastos")
-    fun postGasto(@Body gastoDto: GastoDto): Response<GastoDto>
+    @POST("api/Gastos")
+    suspend fun postGasto(@Body gastoDto: GastoDto): Response<GastoDto>
 
-    @PUT("/api/Gastos/{id}")
-    fun putGasto(@Path("id") id: Int, @Body gastoDto: GastoDto): Response<Unit>
+    @PUT("api/Gastos/{id}")
+    suspend fun putGasto(@Path("id") id: Int, @Body gastoDto: GastoDto): Response<Unit>
 
-    @DELETE("/api/Gastos/{id}")
-    fun deleteGasto(@Path("id") id: Int): Response<Unit>
+    @DELETE("api/Gastos/{id}")
+    suspend fun deleteGasto(@Path("id") id: Int): Response<Unit>
 }

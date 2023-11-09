@@ -13,8 +13,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.emill_p2_ap2.ui.counter.CounterScreen
 import com.example.emill_p2_ap2.ui.counter.CounterViewModel
+import com.example.emill_p2_ap2.ui.gastoUi.GastoScreen
+import com.example.emill_p2_ap2.ui.gastoUiÇ.GastoViewModel
 import com.example.emill_p2_ap2.ui.theme.Emill_p2_ap2Theme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -28,12 +31,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val viewModel: CounterViewModel = hiltViewModel()
-                    val counter by viewModel.counter.collectAsState(0)
-                    CounterScreen(
-                        counter = counter,
-                        onIncrement = viewModel::increment
-                    )
+                    val gastoViewModel: GastoViewModel = viewModel()
+                    GastoScreen(gastoViewModel = gastoViewModel)
                 }
             }
         }

@@ -27,7 +27,7 @@ object AppModule {
     @Provides
     fun providesGastoApi(moshi: Moshi): GastoApi {
         return Retrofit.Builder()
-            .baseUrl("https://sag-api.azurewebsites.net")
+            .baseUrl("https://sag-api.azurewebsites.net/")
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(GastoApi::class.java)
