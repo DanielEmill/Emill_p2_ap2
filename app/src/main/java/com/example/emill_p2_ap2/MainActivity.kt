@@ -17,7 +17,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.emill_p2_ap2.ui.counter.CounterScreen
 import com.example.emill_p2_ap2.ui.counter.CounterViewModel
 import com.example.emill_p2_ap2.ui.gastoUi.GastoScreen
-import com.example.emill_p2_ap2.ui.gastoUiÇ.GastoViewModel
+import com.example.emill_p2_ap2.ui.gastoUi.GastoViewModel
 import com.example.emill_p2_ap2.ui.theme.Emill_p2_ap2Theme
 import dagger.hilt.android.AndroidEntryPoint
 
