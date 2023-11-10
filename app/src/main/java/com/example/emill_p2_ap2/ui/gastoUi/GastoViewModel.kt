@@ -128,6 +128,7 @@ class GastoViewModel @Inject constructor(
                             _uiState.update { state -> state.copy(gastos = updatedGastos) }
                             limpiar()
                             println("Gasto guardado!")
+                            loadGastos()
                         }
                     } else {
                         _uiState.value = _uiState.value.copy(
@@ -137,13 +138,11 @@ class GastoViewModel @Inject constructor(
                 } catch (e: Exception) {
                     _uiState.value = _uiState.value.copy(error = e.message ?: "Error desconocido")
                 }
-
             } else {
                 println("Datos de gasto no son válidos.")
             }
         }
     }
-
     fun deleteGasto(id: Int) {
         viewModelScope.launch {
             try {
