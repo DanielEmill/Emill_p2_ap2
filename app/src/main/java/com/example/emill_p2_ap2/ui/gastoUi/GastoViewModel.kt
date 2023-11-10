@@ -210,6 +210,7 @@ class GastoViewModel @Inject constructor(
                         }
                         limpiar()
                         println("Gasto actualizado!")
+                        loadGastos()
                     } else {
                         _uiState.value = _uiState.value.copy(
                             error = (result as Resource.Error).message ?: "Error desconocido"
