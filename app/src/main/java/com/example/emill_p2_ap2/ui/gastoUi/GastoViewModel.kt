@@ -43,6 +43,7 @@ class GastoViewModel @Inject constructor(
     var itbis by mutableStateOf(0.0)
     var monto by mutableStateOf(0.0)
     var fecha by mutableStateOf(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+    var descuento by mutableStateOf(0)
 
     var isValidFecha by mutableStateOf(true)
     var isValidIdSuplidor by mutableStateOf(true)
@@ -115,7 +116,8 @@ class GastoViewModel @Inject constructor(
                     concepto = concepto,
                     ncf = ncf,
                     itbis = itbis,
-                    monto = monto
+                    monto = monto,
+                    descuento = 100
                 )
                 try {
                     val result = gastoRepository.postGasto(nuevoGastoDto)
@@ -171,6 +173,8 @@ class GastoViewModel @Inject constructor(
         ncf = gasto.ncf ?: ""
         itbis = gasto.itbis ?: 0.0
         monto = gasto.monto ?: 0.0
+        descuento = gasto.descuento ?: 0
+
     }
 
 
@@ -191,7 +195,8 @@ class GastoViewModel @Inject constructor(
                     concepto = concepto,
                     ncf = ncf,
                     itbis = itbis,
-                    monto = monto
+                    monto = monto,
+                    descuento = descuento
                 )
                 try {
                     val result =
